@@ -7,6 +7,8 @@ set(CMAKE_CXX_FLAGS "-std=c++11 -Wall ${CMAKE_CXX_FLAGS}")
 find_package(catkin REQUIRED COMPONENTS
              roscpp nodelet sensor_msgs cv_bridge image_transport)
 
+find_package(OpenCV REQUIRED)
+
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES qr_detector_nodelet
@@ -15,10 +17,17 @@ catkin_package(
 
 find_library(ZBAR_LIBRARIES NAMES zbar)
 
-include_directories(include ${catkin_INCLUDE_DIRS})
+include_directories(include
+    ${catkin_INCLUDE_DIRS}
+    ${OpenCV_INCLUDE_DIRS}
+)
 
 add_library(qr_detector_nodelet src/qr_detector_nodelet.cpp src/detector.cpp)
-target_link_libraries(qr_detector_nodelet zbar ${catkin_LIBRARIES})
+target_link_libraries(qr_detector_nodelet
+    zbar
+    ${catkin_LIBRARIES}
+    ${OpenCV_LIBS}
+)
 
 install(TARGETS qr_detector_nodelet
     ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}

@@ -51,14 +51,21 @@ void QrDetectorNodelet::imageCallback(const sensor_msgs::ImageConstPtr &image)
 {
   cv_bridge::CvImageConstPtr cv_image;
 
+  ROS_INFO("We've pass here");
   try {
-    cv_image = cv_bridge::toCvShare(image, sensor_msgs::image_encodings::BGR8);
+    // cv_image = cv_bridge::toCvShare(image, sensor_msgs::image_encodings::BGR8);
+    cv_image = cv_bridge::toCvShare(image);
   }
   catch (cv_bridge::Exception& e) {
     ROS_ERROR("cv_bridge exception: %s", e.what());
     return;
   }
 
+  if (!cv_image || cv_image->image.empty()) {
+    ROS_WARN("Received empty or invalid image.");
+    return;
+  }
+  ROS_INFO("Image size: %d x %d", cv_image->image.cols, cv_image->image.rows);
   auto tags = detector_.detect(cv_image->image, 10);
   for (auto& tag : tags)
   {
@@ -67,5 +74,28 @@ void QrDetectorNodelet::imageCallback(const sensor_msgs::ImageConstPtr &image)
     tags_publisher_.publish(message);
   }
 }
+
+
+
+// void QrDetectorNodelet::imageCallback(const sensor_msgs::ImageConstPtr &image)
+// {
+//   cv_bridge::CvImageConstPtr cv_image;
+
+//   try {
+//     cv_image = cv_bridge::toCvShare(image, sensor_msgs::image_encodings::BGR8);
+//   }
+//   catch (cv_bridge::Exception& e) {
+//     ROS_ERROR("cv_bridge exception: %s", e.what());
+//     return;
+//   }
+
+//   auto tags = detector_.detect(cv_image->image, 10);
+//   for (auto& tag : tags)
+//   {
+//     std_msgs::String message;
+//     message.data = tag.message;
+//     tags_publisher_.publish(message);
+//   }
+// }
 
 }
